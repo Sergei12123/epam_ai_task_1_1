@@ -30,6 +30,11 @@ public class Task {
         this.completed = completed;
     }
 
+    public Task(Long id, String title, String description, LocalDateTime dueDate, boolean completed) {
+        this(title, description, dueDate, completed);
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

@@ -1,0 +1,685 @@
+User
+I'm java developer and i need to create simple Spring Boot Application.
+First of all, how do I set up a new Spring Boot project with Maven? Include dependencies for Spring Web, Spring Data JPA, and MySQL, I want to do it with Spring Initializer from official site
+ChatGPT
+Certainly! The Spring Initializr is a great way to kickstart your Spring Boot project. Follow these steps to create a simple Spring Boot application with Maven, Spring Web, Spring Data JPA, and MySQL using the Spring Initializr:
+
+Visit the Spring Initializr website.
+
+Configure your project by selecting the following options:
+
+Project: Select "Maven Project."
+Language: Choose "Java."
+Spring Boot: Choose the latest stable version.
+Group: Enter your desired package name (e.g., com.example).
+Artifact: Enter your project name (e.g., my-spring-boot-app).
+Packaging: Select "Jar" or "War" based on your preference.
+Java: Choose your Java version (e.g., 8, 11, 17).
+Dependencies:
+
+Search and add "Spring Web" (to include Spring MVC for RESTful web services).
+Search and add "Spring Data JPA" (for working with databases using JPA).
+Search and add "MySQL Driver" (to connect to a MySQL database).
+Click the "Generate" button. This will download a ZIP file containing your project.
+
+Extract the downloaded ZIP file to your desired location.
+
+Now, you have a basic Spring Boot project set up with Maven and the required dependencies. Open the project in your preferred Integrated Development Environment (IDE), such as IntelliJ IDEA or Eclipse, and start building your application.
+
+If you're using IntelliJ IDEA, you can open the project by selecting "File" > "Open" and choosing the project directory.
+
+Make sure to configure your MySQL database connection in the application.properties or application.yml file. You can find this file in the src/main/resources directory.
+
+For example, add the following lines to the application.properties file:
+
+properties
+Copy code
+spring.datasource.url=jdbc:mysql://localhost:3306/your_database_name
+spring.datasource.username=your_database_username
+spring.datasource.password=your_database_password
+spring.jpa.hibernate.ddl-auto=update
+Replace your_database_name, your_database_username, and your_database_password with your actual MySQL database details.
+
+Now you can start building your Spring Boot application with Spring Web and Spring Data JPA!
+
+User
+What do I need to do to run this application with MySQL database?
+
+2 / 2
+
+ChatGPT
+To run your Spring Boot application with a MySQL database, you need to follow these steps:
+
+Configure MySQL Connection:
+Open the application.properties or application.yml file in the src/main/resources directory and configure the MySQL connection properties. Set the spring.datasource.url, spring.datasource.username, and spring.datasource.password according to your MySQL setup.
+
+properties
+Copy code
+spring.datasource.url=jdbc:mysql://localhost:3306/your_database_name
+spring.datasource.username=your_database_username
+spring.datasource.password=your_database_password
+spring.jpa.hibernate.ddl-auto=update
+Replace your_database_name, your_database_username, and your_database_password with your actual MySQL database details.
+
+Create a Database:
+Ensure that the MySQL database specified in the spring.datasource.url exists. If it doesn't exist, create it manually or update the URL to a valid database name.
+
+Run the Application:
+Run your Spring Boot application. If you are using an IDE like IntelliJ IDEA or Eclipse, you can usually run the application by right-clicking on the main class (the one with the main method) and selecting "Run."
+
+Verify the Application:
+Once the application is running, open a web browser and navigate to http://localhost:8080 (or the port specified in your application). You may see a default Spring Boot welcome page if everything is set up correctly.
+
+Congratulations! Your Spring Boot application is now connected to a MySQL database. You can start building your entities, repositories, and services to interact with the database using Spring Data JPA. Remember to handle exceptions, validations, and other aspects of your application's business logic.
+
+User
+Now I need to create a "Task" entity as I want to make a ToDoList application
+ChatGPT
+Certainly! To create a Task entity for your ToDoList application, you'll need to define a Java class that represents the structure of your task, and annotate it appropriately for Spring Data JPA. Here's a simple example to get you started:
+
+Create a new Java class for the Task entity. You can place it in the src/main/java/com/example/myapplication directory or a package of your choice.
+
+java
+Copy code
+package com.example.myapplication;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.time.LocalDateTime;
+
+@Entity
+public class Task {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private String description;
+    private LocalDateTime dueDate;
+    private boolean completed;
+
+    // Constructors, getters, and setters
+
+}
+Annotate the class with @Entity to indicate that it's a JPA entity. Use @Id to specify the primary key field, and @GeneratedValue to automatically generate unique IDs.
+
+Add fields for the task properties such as title, description, dueDate, and completed. Adjust these fields based on your requirements.
+
+Create constructors (including a default constructor), getters, and setters for your entity.
+
+Now that you have the Task entity, you can start using it with Spring Data JPA. You can create a repository interface for Task to perform CRUD operations. For example:
+
+java
+Copy code
+package com.example.myapplication;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TaskRepository extends JpaRepository<Task, Long> {
+    // You can add custom query methods here if needed
+}
+This TaskRepository interface extends JpaRepository, providing out-of-the-box CRUD operations. Spring Data JPA will automatically generate the necessary queries based on the method names.
+
+Finally, you can use the TaskRepository in your services to interact with the database and manage tasks in your ToDoList application.
+
+Remember to customize the Task entity and repository based on your specific requirements for the ToDoList application. You might want to add validation, relationships with other entities, or additional methods in the repository as needed.
+
+User
+What is the structure of the service class for managing Todo items? Include methods for creating, reading, updating, and deleting Todo items
+ChatGPT
+Certainly! A service class in a Spring application is responsible for implementing business logic and coordinating interactions between the controller and the repository. Below is a simple example of a TaskService class for managing Todo items:
+
+java
+Copy code
+package com.example.myapplication;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class TaskService {
+
+    private final TaskRepository taskRepository;
+
+    @Autowired
+    public TaskService(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
+    }
+
+    // Method to create a new task
+    public Task createTask(Task task) {
+        // Additional business logic/validation can be added here
+        return taskRepository.save(task);
+    }
+
+    // Method to get all tasks
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
+    }
+
+    // Method to get a task by ID
+    public Optional<Task> getTaskById(Long taskId) {
+        return taskRepository.findById(taskId);
+    }
+
+    // Method to update an existing task
+    public Task updateTask(Long taskId, Task updatedTask) {
+        // Additional business logic/validation can be added here
+        return taskRepository.findById(taskId)
+                .map(existingTask -> {
+                    existingTask.setTitle(updatedTask.getTitle());
+                    existingTask.setDescription(updatedTask.getDescription());
+                    existingTask.setDueDate(updatedTask.getDueDate());
+                    existingTask.setCompleted(updatedTask.isCompleted());
+                    return taskRepository.save(existingTask);
+                })
+                .orElse(null); // Handle if the task with the given ID is not found
+    }
+
+    // Method to delete a task by ID
+    public boolean deleteTask(Long taskId) {
+        // Additional business logic/validation can be added here
+        if (taskRepository.existsById(taskId)) {
+            taskRepository.deleteById(taskId);
+            return true;
+        }
+        return false; // Handle if the task with the given ID is not found
+    }
+}
+Here's a breakdown of the key aspects of this TaskService class:
+
+Annotated with @Service: Indicates that this class is a Spring service component.
+
+Constructor Injection: Injects the TaskRepository dependency using constructor injection. This is achieved through the @Autowired annotation on the constructor.
+
+Methods:
+
+createTask: Creates a new task by saving it to the repository.
+getAllTasks: Retrieves a list of all tasks.
+getTaskById: Retrieves a task by its ID.
+updateTask: Updates an existing task by its ID.
+deleteTask: Deletes a task by its ID.
+Additional Business Logic: You can add additional business logic or validation within these methods as needed.
+
+Remember to customize this class based on your specific requirements and business logic for managing Todo items in your application.
+
+User
+I can't execute setTitle, setDescription, setDueDate, setCompleted and similar methods on get as they don't exist, what do I need to do to the Task entity to make these methods available?
+
+3 / 4
+
+ChatGPT
+If the setTitle, setDescription, setDueDate, setCompleted, and similar methods are not available in your Task entity, it suggests that these setter methods are not defined in the entity class. To resolve this, you need to add setter methods for the properties you want to modify. Here's an updated version of the Task entity with the necessary setter methods:
+
+java
+Copy code
+package com.example.myapplication;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.time.LocalDateTime;
+
+@Entity
+public class Task {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+    private String description;
+    private LocalDateTime dueDate;
+    private boolean completed;
+
+    // Constructors (including a default constructor), getters, and setters
+
+    public Task() {
+        // Default constructor
+    }
+
+    public Task(String title, String description, LocalDateTime dueDate, boolean completed) {
+        this.title = title;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.completed = completed;
+    }
+
+    // Getters and setters for all fields
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+}
+In this version of the Task entity, I've added setter methods (setTitle, setDescription, setDueDate, setCompleted) for each of the fields (title, description, dueDate, completed). Additionally, I've added a default constructor and a constructor that takes parameters for easy instantiation.
+
+Make sure to update your Task entity class in your project with these changes. Once you've done this, you should be able to use the setter methods in your TaskService to update the properties of a Task instance.
+
+User
+How do I create a RESTful controller in Spring Boot to handle CRUD operations for Todo items? Include methods for creating, reading, updating, and deleting Todo items.
+ChatGPT
+To create a RESTful controller in Spring Boot to handle CRUD operations for Todo items, you need to create a controller class with methods that correspond to the CRUD operations. Below is an example TaskController class:
+
+java
+Copy code
+package com.example.myapplication;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/tasks")
+public class TaskController {
+
+    private final TaskService taskService;
+
+    @Autowired
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
+
+    // Endpoint to create a new task
+    @PostMapping
+    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+        Task createdTask = taskService.createTask(task);
+        return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+    }
+
+    // Endpoint to get all tasks
+    @GetMapping
+    public ResponseEntity<List<Task>> getAllTasks() {
+        List<Task> tasks = taskService.getAllTasks();
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    }
+
+    // Endpoint to get a task by ID
+    @GetMapping("/{taskId}")
+    public ResponseEntity<Task> getTaskById(@PathVariable Long taskId) {
+        Optional<Task> task = taskService.getTaskById(taskId);
+        return task.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    // Endpoint to update a task by ID
+    @PutMapping("/{taskId}")
+    public ResponseEntity<Task> updateTask(@PathVariable Long taskId, @RequestBody Task updatedTask) {
+        Task updated = taskService.updateTask(taskId, updatedTask);
+        return updated != null ?
+                new ResponseEntity<>(updated, HttpStatus.OK) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    // Endpoint to delete a task by ID
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long taskId) {
+        boolean deleted = taskService.deleteTask(taskId);
+        return deleted ? new ResponseEntity<>(HttpStatus.NO_CONTENT) :
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+}
+Here's a breakdown of the key aspects of this TaskController class:
+
+Annotated with @RestController: Indicates that this class is a Spring MVC controller that handles RESTful requests.
+
+Annotated with @RequestMapping("/api/tasks"): Defines the base path for all the endpoints in this controller.
+
+Constructor Injection: Injects the TaskService dependency using constructor injection.
+
+Methods:
+
+createTask: Handles HTTP POST requests to create a new task.
+getAllTasks: Handles HTTP GET requests to retrieve all tasks.
+getTaskById: Handles HTTP GET requests to retrieve a task by ID.
+updateTask: Handles HTTP PUT requests to update a task by ID.
+deleteTask: Handles HTTP DELETE requests to delete a task by ID.
+RequestMapping annotations (@PostMapping, @GetMapping, @PutMapping, @DeleteMapping): Specify the HTTP method and the path for each endpoint.
+
+ResponseEntity: Wraps the response data and HTTP status code. It provides flexibility in customizing the response.
+
+Make sure to customize this class based on your specific requirements for managing Todo items in your application. Additionally, don't forget to configure exception handling and validation based on your needs.
+
+User
+How to configure an application to connect to MySQL database using Hibernate? Include the database connection properties in the application.properties file as well as the commands I need to execute to start and create MySQL database via Docker
+
+2 / 2
+
+ChatGPT
+To configure a Spring Boot application to connect to a MySQL database using Hibernate, you'll need to provide the database connection properties in the application.properties file. Additionally, I'll provide you with Docker commands to start and create a MySQL database.
+
+Application Configuration (application.properties):
+Open your src/main/resources/application.properties file and add the following database connection properties:
+
+properties
+Copy code
+# Database connection properties
+spring.datasource.url=jdbc:mysql://localhost:3306/your_database_name
+spring.datasource.username=your_database_username
+spring.datasource.password=your_database_password
+
+# Hibernate properties
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+Replace your_database_name, your_database_username, and your_database_password with your actual MySQL database details.
+
+Docker Commands:
+Assuming you have Docker installed, you can use the following commands to start and create a MySQL database container:
+
+Pull the MySQL Docker image:
+
+bash
+Copy code
+docker pull mysql:latest
+Start a MySQL container:
+
+bash
+Copy code
+docker run -d \
+  --name mysql-container \
+  -e MYSQL_ROOT_PASSWORD=root_password \
+  -e MYSQL_DATABASE=your_database_name \
+  -e MYSQL_USER=your_database_username \
+  -e MYSQL_PASSWORD=your_database_password \
+  -p 3306:3306 \
+  mysql:latest
+Replace root_password, your_database_name, your_database_username, and your_database_password with your desired values.
+
+MYSQL_ROOT_PASSWORD: Password for the MySQL root user.
+MYSQL_DATABASE: Name of the database to be created.
+MYSQL_USER: MySQL user to be created.
+MYSQL_PASSWORD: Password for the MySQL user.
+Verify the MySQL container is running:
+
+bash
+Copy code
+docker ps
+Ensure that the MySQL container is listed and running.
+
+Now, your Spring Boot application should be able to connect to the MySQL database using the specified connection properties. Run your Spring Boot application, and it should create/update tables based on your entities and perform CRUD operations against the MySQL database.
+
+Remember to handle security aspects carefully, such as using environment variables or a secure configuration mechanism for sensitive information like database credentials in a production environment.
+
+User
+Write unit tests for me covering all methods of the TaskService and TaskController class (create tests for each method, even if the tests are similar)
+
+3 / 3
+
+ChatGPT
+Sure, let's write some basic unit tests for the TaskService and TaskController classes using JUnit and Mockito. Note that these tests are basic examples, and you may want to expand them based on your specific requirements.
+
+TaskService Tests:
+java
+Copy code
+package com.example.myapplication;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+class TaskServiceTest {
+
+    @Mock
+    private TaskRepository taskRepository;
+
+    @InjectMocks
+    private TaskService taskService;
+
+    public TaskServiceTest() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void createTaskTest() {
+        Task taskToCreate = new Task("Test Task", "Description", LocalDateTime.now(), false);
+        Task createdTask = new Task(1L, "Test Task", "Description", LocalDateTime.now(), false);
+
+        when(taskRepository.save(any(Task.class))).thenReturn(createdTask);
+
+        Task result = taskService.createTask(taskToCreate);
+
+        assertEquals(createdTask, result);
+        verify(taskRepository, times(1)).save(any(Task.class));
+    }
+
+    @Test
+    void getAllTasksTest() {
+        Task task1 = new Task(1L, "Task 1", "Description 1", LocalDateTime.now(), false);
+        Task task2 = new Task(2L, "Task 2", "Description 2", LocalDateTime.now(), true);
+
+        when(taskRepository.findAll()).thenReturn(Arrays.asList(task1, task2));
+
+        List<Task> result = taskService.getAllTasks();
+
+        assertEquals(2, result.size());
+        assertEquals(task1, result.get(0));
+        assertEquals(task2, result.get(1));
+        verify(taskRepository, times(1)).findAll();
+    }
+
+    @Test
+    void getTaskByIdTest() {
+        Task task = new Task(1L, "Test Task", "Description", LocalDateTime.now(), false);
+
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+
+        Optional<Task> result = taskService.getTaskById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(task, result.get());
+        verify(taskRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    void updateTaskTest() {
+        Task existingTask = new Task(1L, "Existing Task", "Description", LocalDateTime.now(), false);
+        Task updatedTask = new Task(1L, "Updated Task", "Updated Description", LocalDateTime.now(), true);
+
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(existingTask));
+        when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
+
+        Task result = taskService.updateTask(1L, updatedTask);
+
+        assertEquals(updatedTask, result);
+        verify(taskRepository, times(1)).findById(1L);
+        verify(taskRepository, times(1)).save(any(Task.class));
+    }
+
+    @Test
+    void deleteTaskTest() {
+        when(taskRepository.existsById(1L)).thenReturn(true);
+
+        boolean result = taskService.deleteTask(1L);
+
+        assertTrue(result);
+        verify(taskRepository, times(1)).existsById(1L);
+        verify(taskRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteTaskNotFoundTest() {
+        when(taskRepository.existsById(1L)).thenReturn(false);
+
+        boolean result = taskService.deleteTask(1L);
+
+        assertFalse(result);
+        verify(taskRepository, times(1)).existsById(1L);
+        verify(taskRepository, never()).deleteById(1L);
+    }
+}
+TaskController Tests:
+java
+Copy code
+package com.example.myapplication;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+class TaskControllerTest {
+
+    @Mock
+    private TaskService taskService;
+
+    @InjectMocks
+    private TaskController taskController;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void createTaskTest() throws Exception {
+        Task taskToCreate = new Task("Test Task", "Description", LocalDateTime.now(), false);
+        Task createdTask = new Task(1L, "Test Task", "Description", LocalDateTime.now(), false);
+
+        when(taskService.createTask(any(Task.class))).thenReturn(createdTask);
+
+        ResponseEntity<Task> response = taskController.createTask(taskToCreate);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(createdTask, response.getBody());
+        verify(taskService, times(1)).createTask(any(Task.class));
+    }
+
+    @Test
+    void getAllTasksTest() {
+        Task task1 = new Task(1L, "Task 1", "Description 1", LocalDateTime.now(), false);
+        Task task2 = new Task(2L, "Task 2", "Description 2", LocalDateTime.now(), true);
+
+        when(taskService.getAllTasks()).thenReturn(Arrays.asList(task1, task2));
+
+        ResponseEntity<List<Task>> response = taskController.getAllTasks();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        assertEquals(task1, response.getBody().get(0));
+        assertEquals(task2, response.getBody().get(1));
+        verify(taskService, times(1)).getAllTasks();
+    }
+
+    @Test
+    void getTaskByIdTest() {
+        Task task = new Task(1L, "Test Task", "Description", LocalDateTime.now(), false);
+
+        when(taskService.getTaskById(1L)).thenReturn(Optional.of(task));
+
+        ResponseEntity<Task> response = taskController.getTaskById(1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(task, response.getBody());
+        verify(taskService, times(1)).getTaskById(1L);
+    }
+
+    @Test
+    void updateTaskTest() throws Exception {
+        Task existingTask = new Task(1L, "Existing Task", "Description", LocalDateTime.now(), false);
+        Task updatedTask = new Task(1L, "Updated Task", "Updated Description", LocalDateTime.now(), true);
+
+        when(taskService.updateTask(eq(1L), any(Task.class))).thenReturn(updatedTask);
+
+        ResponseEntity<Task> response = taskController.updateTask(1L, updatedTask);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(updatedTask, response.getBody());
+        verify(taskService, times(1)).updateTask(eq(1L), any(Task.class));
+    }
+
+    @Test
+    void deleteTaskTest() {
+        when(taskService.deleteTask(1L)).thenReturn(true);
+
+        ResponseEntity<Void> response = taskController.deleteTask(1L);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(taskService, times(1)).deleteTask(1L);
+    }
+
+    @Test
+    void deleteTaskNotFoundTest() {
+        when(taskService.deleteTask(1L)).thenReturn(false);
+
+        ResponseEntity<Void> response = taskController.deleteTask(1L);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(taskService, times(1)).deleteTask(1L);
+    }
+}
+These tests use Mockito for mocking dependencies and JUnit for writing the actual test cases. Make sure to add appropriate dependencies to your project, such as JUnit and Mockito. Additionally, adapt the tests based on your specific application requirements.
